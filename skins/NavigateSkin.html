@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Skin xmlns:s="es.core" class="navigate">
+    <s:Metadata>[HostComponent("es.components.Navigate")]</s:Metadata>
+    <s:Script>
+    <![CDATA[
+
+        import es.events.NavigateEvent;
+        private onClick(e:MouseEvent)
+        {
+            var hostComponent:Navigate = this.hostComponent;
+            var target:Element = new Element( e.target );
+            var href:String = target.property("href") as String;
+            if( href === hostComponent.current )
+            {
+                e.preventDefault();
+                return false; 
+            }
+
+            var datalist:Array = this.assign( "datalist" ) as Array;
+
+            if( hostComponent.jumpUrl && hostComponent.viewport )
+            {
+                var segment:Object = Locator.create( Locator.url() ) as Object;
+                for(var index:int=0;index < datalist.length;index++)
+                {
+                    if( datalist[index].link === href )
+                    {
+                        segment.query.current = index;
+                        target.property("href",  Locator.toUrl( segment ) );
+                        return true;
+                    }
+                }
+            }
+
+            var event:NavigateEvent = new NavigateEvent( NavigateEvent.URL_JUMP_BEFORE );
+            event.content = href;
+            event.originalEvent = e;
+            if( datalist )
+            {
+                for(var i:int in datalist)
+                {
+                    if(datalist[i].link===event.content)
+                    {
+                        event.item=datalist[i] as Object;
+                        break;
+                    }
+                }
+            }
+
+            hostComponent.dispatchEvent(event);
+        }
+
+    ]]>
+    </s:Script>
+    
+    <style file="NavigateStyle.less" />
+
+    <s:Declare>
+       const {
+           target:Boolean=false,
+           datalist:Array=[]
+        } = dataset;
+    </s:Declare>
+
+    <ul class="nav nav-pills">
+        <:foreach name="datalist" value="item" key="link">
+            <:if condition="hostComponent.match(item as Object,link)">
+                <li role="presentation" class="active">
+                    <a href="{item.link}" onClick="{this.onClick}" target="{target? '_blank' : '_self'}">{item.label}</a>
+                </li>
+            <:else />
+                <li role="presentation">
+                    <a href="{item.link}" onClick="{this.onClick}" target="{target ? '_blank' : '_self'}">{item.label}</a>
+                </li>
+            </:if>
+        </:foreach>
+    </ul>
+</s:Skin>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Skin name="table" class="table data-grid-skin"  xmlns:c="es.components" xmlns:s="es.core">
+    <s:Metadata>[HostComponent("es.components.DataGrid")]</s:Metadata>
+    <s:Script>
+        <![CDATA[
+           import es.events.PaginationEvent;
+           import es.core.Display;
+           import es.core.Skin;
+
+           override protected function mount()
+           {
+                super.mount();
+                var hostComponent:DataGrid = this.hostComponent as DataGrid;
+                var radius:String= hostComponent.radius+'px';
+                var table:Element =  this.element;
+                table.style('borderRadius', radius );
+                Element('thead > tr:first-child >th:first-child' , table).style('borderTopLeftRadius',radius );
+                Element('thead > tr:first-child >th:last-child' , table).style('borderTopRightRadius',radius );
+                Element('tfoot > tr:last-child >td:first-child' , table).style('borderBottomLeftRadius',radius );
+                Element('tfoot > tr:last-child >td:last-child' , table).style('borderBottomRightRadius',radius );
+                Element('td', this.foot).height( hostComponent.footHeight );
+            }
+
+
+        ]]>
+    </s:Script>
+
+    <style file="DataGridStyle.less" />
+
+    <s:Declare>
+    <![CDATA[
+
+       const {
+           headHeight:int=25,
+           rowHeight:int=25,
+           footHeight:int=25,
+           datalist:Array=[],
+           columns:Object={},
+           current:int=NaN
+        } = dataset;
+
+        const getStyleHeight:Function = ( value:int )=>{
+            return `height:${value}px;line-height:${value}px;`;
+        };
+
+        const footer:Array = hostComponent.footer;
+        const showFoot:Boolean = !!(footer && footer.length);
+
+    ]]>
+    </s:Declare>
+
+    <thead id="@head">
+        <tr>
+            <:foreach name="columns" value="name" >
+                <th setStyle="{getStyleHeight(headHeight)}">{name}</th>
+            </:foreach>
+        </tr>
+    </thead>
+
+    <tbody id="@body">
+        <:foreach name="datalist" value="item">
+            <tr>
+                <:foreach name="columns" value="val" key="field">
+                    <:switch name="field">
+                        <:case condition="name" break="true">
+                            <td data-column="{field}" setStyle="{getStyleHeight(rowHeight)}">
+                                <input value="{item[field]}" />
+                            </td>
+                        </:case>
+                        <:default>
+                            <td data-column="{field}" setStyle="{getStyleHeight(rowHeight)}">{item[field]}</td>
+                        </:default>
+                    </:switch>
+                </:foreach>
+            </tr>
+        </:foreach>
+    </tbody>
+
+    <tfoot includeIn="@showFoot">
+         <tr>
+             <td colspan="3" setStyle="{getStyleHeight(footHeight)}" id="@foot">
+                {footer}
+             </td>
+         </tr>
+    </tfoot> 
+
+</s:Skin>

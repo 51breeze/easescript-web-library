@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Skin class="popup" tabindex="-1" xmlns:c="es.components" xmlns:s="es.core">
+    <s:Metadata>[HostComponent("es.components.PopUp")]</s:Metadata>
+    <s:Script>
+    <![CDATA[
+
+        import es.core.State;
+
+        private var _makeMap:Object={};
+        private makeAction(name:String):Function
+        {
+            if( _makeMap.hasOwnProperty(name) )
+            {
+                return _makeMap[name] as Function;
+            }
+            var host:PopUp = hostComponent as PopUp;
+            var fn:Function = host.action.bind(host, name);
+            _makeMap[name] = fn;
+            return fn;
+        }
+
+        override public set width(val:uint):void
+        {
+            this.popupContainer.width = val;
+        }
+
+        override public get width():uint
+        {
+            return this.popupContainer.width;
+        }
+
+        private var hasSetHeight:Boolean = false;
+        override public set height(val:uint):void
+        {
+            this.popupContainer.height = val;
+            hasSetHeight = true;
+        }
+
+        override public get height():uint
+        {
+            return this.popupContainer.height;
+        }
+
+        override protected updateDisplayList()
+        {
+            super.updateDisplayList();
+            var h:uint = this.popupContainer.height;
+            var stateGroup:State = this.getCurrentStateGroup();
+            if( !stateGroup.includeIn("tips") )
+            {
+                h-=head.height;
+            }
+
+            if( !stateGroup.includeIn("simple") )
+            {
+                h-=footer.height;
+            }
+            this.body.height = h;
+        }
+
+    ]]>
+    </s:Script>
+    <style file="PopUpStyle.less" />
+    <s:states>
+        <s:State name="tips" stateGroup="simple" />
+        <s:State name="title" stateGroup="simple" />
+        <s:State name="alert" stateGroup="normal" />
+        <s:State name="confirm" stateGroup="normal" />
+        <s:State name="modality" stateGroup="normal" />
+    </s:states>
+    <s:currentState>alert</s:currentState>
+    <s:Declare>
+       const {
+           titleText:*="title",
+           closeText:*="×",
+           submitText:*="确 定",
+           cancelText:*="取 消",
+           headHeight:uint=NaN,
+           footerHeight:uint=NaN,
+           left:uint=NaN,
+           top:uint=NaN,
+           right:uint=NaN,
+           bottom:uint=NaN
+           } = dataset;
+    </s:Declare>
+
+    <s:Container
+         name="div" 
+         class="popup-container fixed"
+         id="@popupContainer"
+         left="{left}" 
+         top="{top}" 
+         right="{right}" 
+         bottom="{bottom}"
+        class.modality="popup-container fixed popup-lg">
+
+            <s:Container class="popup-head" id="@head" height="{headHeight}" excludeFrom="tips">
+                <span class="popup-title">{titleText}</span>
+                <button type="button" class="close" excludeFrom="title" onClick="{makeAction('close')}">{closeText}</button>
+            </s:Container>
+
+            <s:Container class="popup-body" id="@body">
+                {children}
+            </s:Container>
+            <s:Container class="popup-footer" id="@footer" height="{footerHeight}" excludeFrom="simple">
+
+                <button type="button" 
+                    class="btn btn-sm btn-default" 
+                    class.modality="btn btn-default" 
+                    onClick="{makeAction('cancel')}"
+                    excludeFrom="alert">
+                    {cancelText}
+                </button>
+
+                <button type="button" 
+                    class="btn btn-sm btn-primary" 
+                    onClick="{makeAction('submit')}"
+                    class.modality="btn btn-sm btn-primary">
+                    {submitText}
+                </button>
+
+            </s:Container>
+
+    </s:Container>
+</s:Skin>

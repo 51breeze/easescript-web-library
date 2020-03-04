@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Skin xmlns:s="es.core" class="pagination">
+    <s:Metadata>[HostComponent("es.components.Pagination")]</s:Metadata>
+    <s:Script>
+    <![CDATA[
+
+       private makeClick( page:int ):Function
+       {
+           return this.hostComponent.jumpUrl ? null : (e:MouseEvent)=>{
+                if ( page > 0 )
+                {
+                    e.preventDefault();
+                    this.hostComponent.current = page;
+                }
+           };
+       }
+
+    ]]>
+    </s:Script>
+  <style file="PaginationStyle.less" />
+
+  <s:Declare>
+      const {
+          urlFactor:Function,
+          first:int,
+          prev:int,
+          next:int,
+          last:int,
+          profile:*,
+          current:int=1,
+          radius:int=3,
+          linkBtn:Array
+      } = dataset;
+      const radiuStyle:string = `borderRadius:${radius}px`;
+
+  </s:Declare>
+  <li class="first">
+      <a href="{urlFactor(first,profile)}" onclick="{makeClick(first)}">第一页</a>
+  </li>
+  <li class="prev">
+      <a href="{urlFactor(prev,profile)}" class='{current===1?"disabled":""}' onclick="{makeClick(prev)}">上一页</a>
+  </li>
+  <:foreach name="linkBtn" value="val">
+      <li class="link {val==current?'current':''}" setStyle="{radiuStyle}">
+          <a href="{urlFactor(val,profile)}" onclick="{makeClick(val as int)}">{val}</a>
+      </li>
+  </:foreach>
+  <li class="next">
+      <a href="{urlFactor(next,profile)}"  onclick="{makeClick(next)}">下一页</a>
+  </li>
+  <li class="last">
+      <a href="{urlFactor(last,profile)}" onclick="{makeClick(last)}">最后页</a>
+  </li>
+</s:Skin>
